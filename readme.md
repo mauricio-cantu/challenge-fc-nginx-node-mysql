@@ -1,4 +1,4 @@
-# NGINX Reverse Proxy Challenge
+# Full Cycle course - NGINX Reverse Proxy Challenge
 
 In this challenge, you'll set up NGINX as a reverse proxy for a Node.js application that adds records to a MySQL database.
 
