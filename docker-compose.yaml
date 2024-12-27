@@ -1,7 +1,6 @@
 name: docker-mysql
 
 services:
-
   nginx:
     build:
       context: nginx-node-proxy
@@ -10,27 +9,32 @@ services:
       - "8080:80"
     networks:
       - node-network
+    entrypoint: dockerize -wait tcp://app:3000 -timeout 50s ./docker-entrypoint.sh nginx -g 'daemon off;'
 
   app:
     container_name: app
     build:
       context: node
-    command: node index.js
     networks:
       - node-network
     volumes:
       - ./node:/usr/src/app
+      - /usr/src/app/node_modules
     tty: true
-      
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 30s
+    command: node index.js
+    depends_on:
+      - db
 
   db:
     image: mysql:5.7
-    command: --innodb-use-native-aio=0
+    command: --innodb-use-native-aio=0 --init-file /data/application/init.sql
     container_name: db
     restart: always
     tty: true
     volumes:
       - ./mysql:/var/lib/mysql
+      - ./mysql-setup.sql:/data/application/init.sql
     environment:
       - MYSQL_DATABASE=nodedb
       - MYSQL_ROOT_PASSWORD=root
@@ -40,5 +44,3 @@ services:
 networks:
   node-network:
     driver: bridge
-
-
